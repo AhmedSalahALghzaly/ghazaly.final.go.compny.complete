@@ -128,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           {/* Dark Mode Toggle */}
-          <TouchableOpacity onPress={toggleTheme} style={styles.iconButton}>
+          <TouchableOpacity onPress={() => toggleTheme(theme === 'dark' ? 'light' : 'dark')} style={styles.iconButton}>
             <Ionicons 
               name={isDark ? 'sunny' : 'moon'} 
               size={22} 
