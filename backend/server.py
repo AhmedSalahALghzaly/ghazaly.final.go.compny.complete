@@ -215,6 +215,29 @@ class SyncPullRequest(BaseModel):
     last_pulled_at: Optional[int] = None
     tables: List[str] = []
 
+# ==================== Marketing System Schemas ====================
+
+class PromotionCreate(BaseModel):
+    title: str
+    title_ar: Optional[str] = None
+    image: Optional[str] = None
+    promotion_type: str = "slider"  # slider or banner
+    is_active: bool = True
+    target_product_id: Optional[str] = None
+    target_car_model_id: Optional[str] = None
+    sort_order: int = 0
+
+class BundleOfferCreate(BaseModel):
+    name: str
+    name_ar: Optional[str] = None
+    description: Optional[str] = None
+    description_ar: Optional[str] = None
+    discount_percentage: float
+    target_car_model_id: Optional[str] = None
+    product_ids: List[str] = []
+    image: Optional[str] = None
+    is_active: bool = True
+
 # ==================== Helpers ====================
 
 def get_timestamp_ms() -> int:
