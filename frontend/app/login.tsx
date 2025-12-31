@@ -17,7 +17,7 @@ import { useTranslation } from '../src/hooks/useTranslation';
 import { useAppStore, useHasHydrated } from '../src/store/appStore';
 import { authApi } from '../src/services/api';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://bizowner.preview.emergentagent.com';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://go-compo-dev.preview.emergentagent.com';
 
 export default function LoginScreen() {
   const { colors } = useTheme();
