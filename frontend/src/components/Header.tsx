@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, StatusBar, Image, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -17,6 +17,17 @@ const LOGO_URL = 'https://customer-assets.emergentagent.com/job_carcomponents-3/
 const ADMIN_EMAILS = [
   'ahmed.salah.ghazaly.91@gmail.com',
   'ahmed.salah.mohamed.ai2025@gmail.com',
+  'pc.2025.ai@gmail.com',
+];
+
+// Color Moods for the Mood Switcher
+const COLOR_MOODS = [
+  { id: 'ocean', name: 'Ocean', nameAr: 'المحيط', primary: '#0EA5E9', background: '#F0F9FF', icon: 'water' },
+  { id: 'sunset', name: 'Sunset', nameAr: 'الغروب', primary: '#F97316', background: '#FFF7ED', icon: 'sunny' },
+  { id: 'forest', name: 'Forest', nameAr: 'الغابة', primary: '#22C55E', background: '#F0FDF4', icon: 'leaf' },
+  { id: 'lavender', name: 'Lavender', nameAr: 'اللافندر', primary: '#A855F7', background: '#FAF5FF', icon: 'flower' },
+  { id: 'rose', name: 'Rose', nameAr: 'الوردي', primary: '#EC4899', background: '#FDF2F8', icon: 'rose' },
+  { id: 'midnight', name: 'Midnight', nameAr: 'منتصف الليل', primary: '#6366F1', background: '#EEF2FF', icon: 'moon' },
 ];
 
 interface HeaderProps {
@@ -44,16 +55,38 @@ export const Header: React.FC<HeaderProps> = ({
   const setLanguage = useAppStore((state) => state.setLanguage);
   const cartItems = useAppStore((state) => state.cartItems);
   const user = useAppStore((state) => state.user);
+  const setColorMood = useAppStore((state) => state.setColorMood);
+  const currentMood = useAppStore((state) => state.currentMood);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // State for search and notifications
+  // State for search, notifications, and mood switcher
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMoodSwitcher, setShowMoodSwitcher] = useState(false);
 
   // Header is always white background
   const headerBgColor = '#FFFFFF';
   const headerTextColor = '#1a1a2e';
   const headerIconColor = '#1a1a2e';
+
+  const handleMoodSelect = (mood: typeof COLOR_MOODS[0]) => {
+    setColorMood({
+      primary: mood.primary,
+      background: mood.background,
+      surface: '#FFFFFF',
+      text: '#1E3A5F',
+      textSecondary: '#64748B',
+      border: '#E2E8F0',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+      card: '#FFFFFF',
+      tabBar: '#FFFFFF',
+      tabBarActive: mood.primary,
+      tabBarInactive: '#9CA3AF',
+    });
+    setShowMoodSwitcher(false);
+  };
 
   return (
     <View style={[
@@ -82,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
               style={styles.logoImage}
               resizeMode="contain"
             />
-            <Text style={[styles.brandText, { color: colors.primary }]}>
+            <Text style={[styles.brandText, { color: currentMood?.primary || colors.primary }]}>
               {language === 'ar' ? 'لقطع غيار السيارات' : 'AUTO PARTS'}
             </Text>
           </TouchableOpacity>
@@ -116,6 +149,14 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Notification Bell */}
           <NotificationBell onPress={() => setShowNotifications(true)} />
+
+          {/* Mood Switcher / Palette Icon */}
+          <TouchableOpacity 
+            onPress={() => setShowMoodSwitcher(true)} 
+            style={styles.iconButton}
+          >
+            <Ionicons name="color-palette" size={22} color={currentMood?.primary || headerIconColor} />
+          </TouchableOpacity>
 
           {/* Admin Panel Icon - Only visible for authorized admins */}
           {user && ADMIN_EMAILS.includes(user.email?.toLowerCase()) && (
@@ -187,6 +228,48 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Notification Center */}
       <NotificationCenter visible={showNotifications} onClose={() => setShowNotifications(false)} />
+
+      {/* Mood Switcher Modal */}
+      <Modal
+        visible={showMoodSwitcher}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMoodSwitcher(false)}
+      >
+        <TouchableOpacity 
+          style={styles.moodOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMoodSwitcher(false)}
+        >
+          <View style={styles.moodContainer}>
+            <Text style={styles.moodTitle}>
+              {language === 'ar' ? 'اختر المزاج' : 'Choose Mood'}
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.moodGrid}>
+                {COLOR_MOODS.map((mood) => (
+                  <TouchableOpacity
+                    key={mood.id}
+                    style={[
+                      styles.moodItem,
+                      { backgroundColor: mood.background, borderColor: mood.primary },
+                      currentMood?.primary === mood.primary && styles.moodItemActive,
+                    ]}
+                    onPress={() => handleMoodSelect(mood)}
+                  >
+                    <View style={[styles.moodIcon, { backgroundColor: mood.primary }]}>
+                      <Ionicons name={mood.icon as any} size={20} color="#FFF" />
+                    </View>
+                    <Text style={[styles.moodName, { color: mood.primary }]}>
+                      {language === 'ar' ? mood.nameAr : mood.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -214,8 +297,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
   },
   logoImage: {
-    width: 65,  // 50 * 1.3 = 65 (30% larger)
-    height: 52, // 40 * 1.3 = 52 (30% larger)
+    width: 65,
+    height: 52,
   },
   brandText: {
     fontSize: 15,
@@ -266,5 +349,58 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 9,
     fontWeight: '700',
+  },
+  // Mood Switcher styles
+  moodOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-start',
+    paddingTop: 120,
+  },
+  moodContainer: {
+    marginHorizontal: 16,
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  moodTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+    textAlign: 'center',
+    color: '#1a1a2e',
+  },
+  moodGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  moodItem: {
+    width: 80,
+    height: 90,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    gap: 8,
+  },
+  moodItemActive: {
+    borderWidth: 3,
+    transform: [{ scale: 1.05 }],
+  },
+  moodIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moodName: {
+    fontSize: 11,
+    fontWeight: '600',
   },
 });
