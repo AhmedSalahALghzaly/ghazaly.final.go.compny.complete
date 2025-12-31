@@ -133,7 +133,7 @@ export default function OwnerDashboard() {
       
       {/* Gradient Background */}
       <LinearGradient
-        colors={mood.gradient.length >= 3 ? mood.gradient as [string, string, string] : ['#1E1E3F', '#2D2D5F', '#3D3D7F']}
+        colors={gradientColors as [string, string, string]}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
