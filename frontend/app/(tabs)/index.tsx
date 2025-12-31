@@ -599,8 +599,11 @@ export default function HomeScreen() {
         </View>
 
         {/* Bottom padding */}
-        <View style={{ height: 100 }} />
+        <View style={{ height: 140 }} />
       </ScrollView>
+      
+      {/* Interactive Car Selector - Bottom Anchor */}
+      <InteractiveCarSelector />
     </View>
   );
 }
